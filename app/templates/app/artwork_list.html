@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %} Artwork List {% endblock %} 
+
+{% block header1 %}
+  <h1> Artwork List </h1>
+{% endblock %}
+
+{% block content %} 
+
+<h2> {{ view.titolo }} artworks </h2>
+
+<br>
+
+{% for art in object_list %}
+<br>
+<div class="card">
+  <div class="card-header">
+    {% if art.available %}
+     Disponibile per la vendita
+    {% else %}
+     NON DISPONIBILE
+     {% endif %}
+  </div>
+  <div class="card-body">
+    <h5 class="card-title">{{ art.name }}</h5>
+    <p class="card-text"> {{ art }} </p>
+  </div>
+</div>
+<br>
+{%endfor%}
+
+{% endblock %}
+<br>
