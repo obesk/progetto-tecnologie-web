@@ -1,15 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    {% comment %}TODO: remove commented code if not needed{% endcomment %}
+    {% comment %} {% block head %}
 
-    {% block head %} {% endblock %}
+    {% endblock %} {% endcomment %}
+    <title>
+      {% block title %}
+      {% endblock %}
+    </title>
+  </head>
+  <body>
+    <div class="container">
+      <ul class="nav bg-info">
+        <li class="nav-item">
+          <a class="nav-link link-light" href="/">HOME</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link link-light" href="/members">MEMBERS</a>
+        </li>
+      </ul>
 
-    <title> {% block title %}{% endblock %}</title>
-</head>
-<body>
-    {% block content %}
+      {% block content %}
 
-    {% endblock %}
-</body>
+      {% endblock %}
+    </div>
+  </body>
 </html>

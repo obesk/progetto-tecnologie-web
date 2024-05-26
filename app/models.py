@@ -34,7 +34,7 @@ class Artwork(models.Model):
 
 	status = models.CharField(
 		max_length = 2,
-		choices = Status,
+		choices = Status.choices,
 		default = Status.HIDDEN,
 	)
 
@@ -54,4 +54,8 @@ class Customer(models.Model):
 	def __str__(self):
 		return str(self.user)
 
+class Photo(models.Model): 
+	file = models.ImageField('Attachment', upload_to="images/")
+	upload_date = models.DateTimeField(auto_now_add=True)
+	artwork = models.ForeignKey(Artwork, on_delete=models.CASCADE, related_name="Photos")
 

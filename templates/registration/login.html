@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %} 
 
-{% block title %} Login come Lettore{% endblock %} 
+{% block title %} Customer Login {% endblock %} 
 
-{% block header1 %}
+{% block header %}
   <h1>Pagina di Login</h1>
   <p>Si prega di compilare i campi necessari</p> 
 {% endblock %}
@@ -16,7 +17,7 @@
 {% endif %}
 
 <form method="post"> {% csrf_token %}
-  {{form.as_table}}
+  {{form.as_p}}
   <button type="submit" class="btn btn-primary">Login</button>
 {% endblock %}
 

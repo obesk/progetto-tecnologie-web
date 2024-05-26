@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %} 
+
+{% block title %} Customer Login {% endblock %} 
+
+{% block header %}
+  <h1>Customer registration</h1>
+  <p>fill the required fields</p> 
+{% endblock %}
+
+{% block content %} 
+
+<form method="post"> {% csrf_token %}
+  {{form.as_p}}
+  <button type="submit" class="btn btn-primary">Register</button>
+{% endblock %}
+
+{% block footer %} {% endblock %}
