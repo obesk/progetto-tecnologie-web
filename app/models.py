@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
+import os
 
 
 class Artist(models.Model):
@@ -58,4 +59,7 @@ class Photo(models.Model):
 	file = models.ImageField('Attachment', upload_to="images/")
 	upload_date = models.DateTimeField(auto_now_add=True)
 	artwork = models.ForeignKey(Artwork, on_delete=models.CASCADE, related_name="Photos")
+
+	def get_static_path(self):
+		return os.path.join("/static/artwork_images/", os.path.basename(self.file.name))
 
