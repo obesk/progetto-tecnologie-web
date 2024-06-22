@@ -9,7 +9,7 @@
   {{ object.name }}
   {{ object.artist }}
 
-  {% comment %} menu for placing bids {% endcomment %}
+  {% comment %}menu for placing bids{% endcomment %}
   <div id="artworkCarousel" class="carousel slide" data-bs-ride="carousel">
     <div class="carousel-inner">
       {% for photo in photos %}
@@ -28,16 +28,17 @@
     </button>
   </div>
 
-  {% comment %} list of messages {% endcomment %}
+  {% comment %}list of messages{% endcomment %}
   {% if messages %}
     {% for message in messages %}
       <div class="alert {% if message.tags %}
+          
           alert-{{ message.tags }}
         {% endif %}">{{ message }}</div>
     {% endfor %}
   {% endif %}
- 
-  {% comment %} menu for placing bids {% endcomment %}
+
+  {% comment %}menu for placing bids{% endcomment %}
   <form action="{% url 'app:placebid' %}" method="post">
     {% csrf_token %}
     <input type="hidden" name="artwork_id" value="{{ artwork.id }}" />
@@ -51,6 +52,20 @@
       </div>
     </div>
   </form>
+
+  <h2>Recommended Artworks</h2>
+  <div class="row">
+    {% for rec_artwork in recommended_artworks %}
+      <div class="col-md-2">
+        <div class="card mb-2">
+          <img src="{{ rec_artwork.Photos.first.get_static_path }}" class="card-img-top" alt="{{ rec_artwork.name }}" />
+          <div class="card-body">
+            <h5 class="card-title">{{ rec_artwork.name }}</h5>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
 {% endblock %}
 
 <br />

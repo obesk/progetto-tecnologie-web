@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 from django.db.models import Max
+from django.utils import timezone
+from datetime import timedelta
 import os
 
 
@@ -23,11 +25,24 @@ class Category(models.Model):
 		return str(self.name)
 
 # TODO: implement auctioning dates
+
+class Customer(models.Model):
+	user = models.OneToOneField(User, on_delete=models.CASCADE)
+	avatar = models.ImageField(upload_to='img/', blank=True, null=True)
+	is_seller = models.BooleanField(default=False)
+	class Meta:
+		verbose_name_plural = "Customers"
+	def __str__(self):
+		return str(self.user)
+
 class Artwork(models.Model):
 	name = models.CharField(max_length=255)
 	artist = models.ForeignKey(Artist, on_delete=models.PROTECT, related_name="Artworks")
 	category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name="Artworks")
 	publication_date = models.DateField()
+	auction_end = models.DateTimeField(default=timezone.now() + timedelta(days=7))
+	seller = models.ForeignKey(Customer, on_delete=models.CASCADE, limit_choices_to={'is_seller': True}, null=True)
+
 	description = models.TextField(max_length=255, default="")
 
 	class Status(models.TextChoices):
@@ -52,15 +67,6 @@ class Artwork(models.Model):
 		return f"Artwork {self.name} ({self.publication_date}), made by the artist: {self.artist}"
 
 
-
-# TODO: manage sellers
-class Customer(models.Model):
-	user = models.OneToOneField(User, on_delete=models.CASCADE)
-	avatar = models.ImageField(upload_to='img/', blank=True, null=True)
-	class Meta:
-		verbose_name_plural = "Customers"
-	def __str__(self):
-		return str(self.user)
 
 class Bid(models.Model):
 	artwork = models.ForeignKey(Artwork, on_delete=models.CASCADE, related_name="Bids")

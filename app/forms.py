@@ -27,7 +27,8 @@ class ArtworkForm(forms.ModelForm):
 
 	class Meta:
 		model = Artwork
-		fields = ['name', 'artist', 'category', 'publication_date', 'images']
+		fields = ['name', 'artist', 'category', 'publication_date', 'images', 'auction_end']
 		widgets = {
 			'publication_date': forms.DateInput(attrs={'type': 'date'}),
+			'auction_end': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
 		}

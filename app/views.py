@@ -5,6 +5,7 @@ from django.views.generic.edit import CreateView
 from django.urls import reverse_lazy
 from django.views.decorators.csrf import csrf_protect
 from django.contrib import messages
+from django.utils import timezone
 
 from .models import Artwork, Photo, Bid, Customer
 from .forms import ArtworkForm
@@ -49,10 +50,39 @@ class ArtworkDetailView(DetailView):
 	# def price(self):
 	# 	highest_bid = self.object.Bids.aggregate(Max('amount', default=0))['amount__max']
 	# 	return highest_bid
+	def get_recommendations(self):
+		artwork = self.object
+		all_artworks = Artwork.objects.exclude(id=artwork.id)
+
+		recommendations = []
+
+		for other_artwork in all_artworks:
+			score = 0
+
+			# Similarity Score
+			if other_artwork.seller == artwork.seller:
+				score += 10  # Adjust weight as needed
+			if other_artwork.category == artwork.category:
+				score += 5  # Adjust weight as needed
+			if other_artwork.artist == artwork.artist:
+				score += 8  # Adjust weight as needed
+
+			# Expiration Score
+			time_to_expiry = other_artwork.auction_end - timezone.now()
+			if time_to_expiry.total_seconds() > 0:
+				score += max(0, (7 * 24 * 3600 - time_to_expiry.total_seconds()) / (7 * 24 * 3600)) * 10
+
+			recommendations.append((other_artwork, score))
+
+		recommendations.sort(key=lambda x: x[1], reverse=True)
+		recommended_artworks = [rec[0] for rec in recommendations[:5]]
+
+		return recommended_artworks
 
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['photos'] = self.object.Photos.all()
+		context['recommended_artworks'] = self.get_recommendations()
 		return context
 
 @csrf_protect
