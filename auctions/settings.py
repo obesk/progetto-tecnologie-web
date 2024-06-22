@@ -46,7 +46,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'esame.urls'
+ROOT_URLCONF = 'auctions.urls'
 
 TEMPLATES = [
     {
@@ -64,7 +64,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'esame.wsgi.application'
+WSGI_APPLICATION = 'auctions.wsgi.application'
 
 
 # Database

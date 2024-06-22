@@ -1,34 +1,35 @@
 {% extends 'base.html' %}
 
-{% block title %} Artwork List {% endblock %} 
+{% block title %}
+  Artwork List
+{% endblock %}
 
 {% block header1 %}
-  <h1> Artwork List </h1>
+  <h1>Artwork List</h1>
 {% endblock %}
 
-{% block content %} 
+{% block content %}
+  <h1>{{ view.titolo }} Artworks </h1>
 
-<h2> {{ view.titolo }} artworks </h2>
+  <br />
 
-<br>
-
-{% for art in object_list %}
-<br>
-<div class="card">
-  <div class="card-header">
-    {% if art.available %}
-     Disponibile per la vendita
-    {% else %}
-     NON DISPONIBILE
-     {% endif %}
-  </div>
-  <div class="card-body">
-    <h5 class="card-title">{{ art.name }}</h5>
-    <p class="card-text"> {{ art }} </p>
-  </div>
-</div>
-<br>
-{%endfor%}
-
+  {% for art in object_list %}
+    <br />
+    <a href="{% url "app:artworkdetail" art.pk %}">
+      <div class="card">
+        <div class="card-header">{{ art.name }}</div>
+        <div class="card-body">
+          <h5 class="card-title">{{ art.artist }}</h5>
+          <p class="card-text">{{ art }}</p>
+          {% if art.available %}
+            <p style="color: green">DISPONIBILE</p>
+          {% else %}
+            <p style="color: red">NON DISPONIBILE</p>
+          {% endif %}
+        </div>
+      </div>
+    </a>
+    <br />
+  {% endfor %}
 {% endblock %}
-<br>
+<br />

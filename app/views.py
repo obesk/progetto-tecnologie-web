@@ -1,10 +1,12 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, get_object_or_404
 from django.views.generic.list import ListView
 from django.views.generic import DetailView
 from django.views.generic.edit import CreateView
 from django.urls import reverse_lazy
+from django.views.decorators.csrf import csrf_protect
+from django.contrib import messages
 
-from .models import Artwork, Photo
+from .models import Artwork, Photo, Bid, Customer
 from .forms import ArtworkForm
 
 import os
@@ -44,7 +46,35 @@ class ArtworkCreateView(CreateView):
 
 class ArtworkDetailView(DetailView):
 	model = Artwork 
+	# def price(self):
+	# 	highest_bid = self.object.Bids.aggregate(Max('amount', default=0))['amount__max']
+	# 	return highest_bid
+
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
 		context['photos'] = self.object.Photos.all()
 		return context
+
+@csrf_protect
+def placeBid(request):
+	if request.method == 'POST':
+		user = request.user  # Retrieve the currently logged-in user
+		customer = Customer.objects.get(user=user)
+		artwork_id = request.POST.get('artwork_id')
+		artwork = get_object_or_404(Artwork, id=artwork_id)
+		try: 
+			amount = float(request.POST.get('amount'))
+			if amount > artwork.price():  # Replace `current_price` with the correct field name in your model
+				Bid.objects.create(artwork=artwork, customer=customer, amount=amount)
+				messages.success(request, 'Bid placed successfully!')
+			else:
+				messages.error(request, 'Bid amount must be higher than the current price.')
+		except ValueError:
+			messages.error(request, 'Invalid bid amount.')
+
+
+		bid = Bid(artwork_id=artwork_id, customer=customer, amount=amount)
+		bid.save()
+		return redirect('app:artworkdetail', pk=artwork_id)  # Adjust 'app:artwork_detail' to your actual view name
+	return redirect('app:artworkdetail')  # Fallback if not POST, adjust 'app:artwork_list' to your actual view name
+	

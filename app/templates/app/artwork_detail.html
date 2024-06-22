@@ -6,13 +6,33 @@
 
 {% block content %}
   <h1>Artwork Detail</h1>
-	{{ object.name }}
-	{{ object.artist }}
+  {{ object.name }}
+  {{ object.artist }}
 
-	{% for photo in photos %}
-		<img src="{{ photo.get_static_path }}" >
-	{% endfor %}
+  {% for photo in photos %}
+    <img src="{{ photo.get_static_path }}" />
+  {% endfor %}
 
+  <form action="{% url 'app:placebid' %}" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="artwork_id" value="{{ artwork.id }}">
+    <div class="input-group">
+      <div class="input-group-prepend">
+        <span class="input-group-text" id="basic-addon3"><strong>${{ artwork.price }}</strong></span>
+      </div>
+      <input type="number" id="typeNumber" class="form-control" name="amount" min="{{ view.price|add:1 }}" />
+      <div class="input-group-append">
+        <button type="submit" class="btn btn-primary">Place Bid</button>
+      </div>
+    </div>
+  </form>
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
 {% endblock %}
 
 <br />

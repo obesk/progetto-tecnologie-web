@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
+from django.db.models import Max
 import os
 
 
@@ -27,6 +28,7 @@ class Artwork(models.Model):
 	artist = models.ForeignKey(Artist, on_delete=models.PROTECT, related_name="Artworks")
 	category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name="Artworks")
 	publication_date = models.DateField()
+	description = models.TextField(max_length=255, default="")
 
 	class Status(models.TextChoices):
 		HIDDEN = "HI", _("Hidden")
@@ -41,9 +43,14 @@ class Artwork(models.Model):
 
 	def available(self):
 		return self.status == self.Status.AUCTIONING
+
+	def price(self):
+		highest_bid = self.Bids.aggregate(Max('amount', default=0))['amount__max']
+		return highest_bid or 0
 	
 	def __str__(self):
 		return f"Artwork {self.name} ({self.publication_date}), made by the artist: {self.artist}"
+
 
 
 # TODO: manage sellers
@@ -55,6 +62,17 @@ class Customer(models.Model):
 	def __str__(self):
 		return str(self.user)
 
+class Bid(models.Model):
+	artwork = models.ForeignKey(Artwork, on_delete=models.CASCADE, related_name="Bids")
+	customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name="Bids")
+	amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+	class Meta:
+		verbose_name_plural = "Bids"
+	def __str__(self):
+		return f"{self.customer} bid {self.amount} euros, for artwork: {self.artwork}"
+
+	
+	
 class Photo(models.Model): 
 	file = models.ImageField('Attachment', upload_to="images/")
 	upload_date = models.DateTimeField(auto_now_add=True)
