@@ -9,8 +9,27 @@
     {% comment %} {% block head %}
 
     {% endblock %} {% endcomment %}
+    <style>
+      .carousel-control-prev,
+      .carousel-control-next {
+        width: 5%;
+      }
+      .carousel-control-prev-icon,
+      .carousel-control-next-icon {
+        background-color: black;
+        color: white;
+        padding: 10px;
+        border-radius: 50%;
+      }
+      .carousel-item img {
+        height: 500px; /* Set a fixed height for all images */
+        object-fit: contain; /* Ensures images cover the area while maintaining aspect ratio */
+        width: 100%;
+      }
+    </style>
     <title>
       {% block title %}
+
       {% endblock %}
     </title>
   </head>

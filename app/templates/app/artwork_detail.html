@@ -9,13 +9,38 @@
   {{ object.name }}
   {{ object.artist }}
 
-  {% for photo in photos %}
-    <img src="{{ photo.get_static_path }}" />
-  {% endfor %}
+  {% comment %} menu for placing bids {% endcomment %}
+  <div id="artworkCarousel" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-inner">
+      {% for photo in photos %}
+        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+          <img src="{{ photo.get_static_path }}" class="d-block w-100" alt="..." />
+        </div>
+      {% endfor %}
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#artworkCarousel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#artworkCarousel" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Next</span>
+    </button>
+  </div>
 
+  {% comment %} list of messages {% endcomment %}
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert {% if message.tags %}
+          alert-{{ message.tags }}
+        {% endif %}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+ 
+  {% comment %} menu for placing bids {% endcomment %}
   <form action="{% url 'app:placebid' %}" method="post">
     {% csrf_token %}
-    <input type="hidden" name="artwork_id" value="{{ artwork.id }}">
+    <input type="hidden" name="artwork_id" value="{{ artwork.id }}" />
     <div class="input-group">
       <div class="input-group-prepend">
         <span class="input-group-text" id="basic-addon3"><strong>${{ artwork.price }}</strong></span>
@@ -26,13 +51,6 @@
       </div>
     </div>
   </form>
-  {% if messages %}
-    {% for message in messages %}
-      <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
-        {{ message }}
-      </div>
-    {% endfor %}
-  {% endif %}
 {% endblock %}
 
 <br />
