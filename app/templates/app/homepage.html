@@ -1,0 +1,59 @@
+<!-- homepage.html -->
+{% extends 'base.html' %}
+
+{% block title %}
+  Home
+{% endblock %}
+
+{% block content %}
+  <h1>Latest Offers</h1>
+
+  <!-- Search Form -->
+  <form method="get" action="{% url 'app:homepage' %}" class="mb-4">
+    <div class="row">
+      <div class="col-md-4 mb-2">
+        <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search by title or description...">
+      </div>
+      <div class="col-md-3 mb-2">
+        <select name="category" class="form-select">
+          <option value="">All Categories</option>
+          {% for category in categories %}
+            <option value="{{ category.id }}" {% if category.id|stringformat:"s" == category_filter %}selected{% endif %}>{{ category.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3 mb-2">
+        <select name="artist" class="form-select">
+          <option value="">All Artists</option>
+          {% for artist in artists %}
+            <option value="{{ artist.id }}" {% if artist.id|stringformat:"s" == artist_filter %}selected{% endif %}>{{ artist.name }} {{ artist.surname }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2 mb-2">
+        <button type="submit" class="btn btn-primary w-100">Search</button>
+      </div>
+    </div>
+  </form>
+
+  <!-- Latest Offers -->
+  <div class="row">
+    {% for artwork in latest_offers %}
+      <div class="col-md-4">
+        <div class="card mb-4 shadow-sm">
+          {% if artwork.Photos.first %}
+            <img src="{{ artwork.Photos.first.file.url }}" class="card-img-top" alt="{{ artwork.name }}">
+          {% endif %}
+          <div class="card-body">
+            <h5 class="card-title">{{ artwork.name }}</h5>
+            <p class="card-text">Artist: {{ artwork.artist.name }} {{ artwork.artist.surname }}</p>
+            <p class="card-text">Category: {{ artwork.category.name }}</p>
+            <p class="card-text">Ends: {{ artwork.auction_end|date:"F j, Y, g:i a" }}</p>
+            <p class="card-text">Current Price: €{{ artwork.price }}</p>
+            <a href="{% url "app:artworkdetail" artwork.pk %}" class="btn btn-primary">View Details</a>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}

@@ -80,7 +80,7 @@ class Bid(models.Model):
 	
 	
 class Photo(models.Model): 
-	file = models.ImageField('Attachment', upload_to="images/")
+	file = models.ImageField('Attachment', upload_to="app/static/artwork_images")
 	upload_date = models.DateTimeField(auto_now_add=True)
 	artwork = models.ForeignKey(Artwork, on_delete=models.CASCADE, related_name="Photos")
 

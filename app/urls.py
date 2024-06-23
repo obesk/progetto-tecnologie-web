@@ -9,7 +9,8 @@ urlpatterns = [
 	path("artworklist/", ArtworksListView.as_view(), name="artworklist"),
 	path("artwork/<pk>", ArtworkDetailView.as_view(), name="artworkdetail"),
 	path("create_artwork/", ArtworkCreateView.as_view(), name="create_artwork"),
-	path("placebid/", placeBid, name="placebid")
+	path("placebid/", placeBid, name="placebid"),
+	path("", homepage, name="homepage"),
 ]
 
 if settings.DEBUG:

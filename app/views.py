@@ -1,4 +1,4 @@
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import redirect, get_object_or_404, render
 from django.views.generic.list import ListView
 from django.views.generic import DetailView
 from django.views.generic.edit import CreateView
@@ -6,8 +6,9 @@ from django.urls import reverse_lazy
 from django.views.decorators.csrf import csrf_protect
 from django.contrib import messages
 from django.utils import timezone
+from django.db.models import Q
 
-from .models import Artwork, Photo, Bid, Customer
+from .models import Artwork, Photo, Bid, Customer, Category, Artist
 from .forms import ArtworkForm
 
 import os
@@ -25,7 +26,7 @@ class ArtworksListView(ListView):
 
 # TODO: make name unique
 def save_uploaded_file(f):
-	filename = 	f"app/static/artwork_images/{f.name}"
+	filename = 	f"media/artwork_images/{f.name}"
 	with open(filename, "wb+") as destination:
 		for chunk in f.chunks():
 			destination.write(chunk)
@@ -75,7 +76,7 @@ class ArtworkDetailView(DetailView):
 			recommendations.append((other_artwork, score))
 
 		recommendations.sort(key=lambda x: x[1], reverse=True)
-		recommended_artworks = [rec[0] for rec in recommendations[:5]]
+		recommended_artworks = [rec[0] for rec in recommendations[:6]]
 
 		return recommended_artworks
 
@@ -108,3 +109,34 @@ def placeBid(request):
 		return redirect('app:artworkdetail', pk=artwork_id)  # Adjust 'app:artwork_detail' to your actual view name
 	return redirect('app:artworkdetail')  # Fallback if not POST, adjust 'app:artwork_list' to your actual view name
 	
+def homepage(request):
+    query = request.GET.get('q')
+    category_filter = request.GET.get('category')
+    artist_filter = request.GET.get('artist')
+
+    latest_offers = Artwork.objects.filter(status=Artwork.Status.AUCTIONING).order_by('-publication_date')
+
+    if query:
+        latest_offers = latest_offers.filter(
+            Q(name__icontains=query) |
+            Q(description__icontains=query)
+        )
+    
+    if category_filter:
+        latest_offers = latest_offers.filter(category_id=category_filter)
+    
+    if artist_filter:
+        latest_offers = latest_offers.filter(artist_id=artist_filter)
+
+    categories = Category.objects.all()
+    artists = Artist.objects.all()
+
+    context = {
+        'latest_offers': latest_offers,
+        'query': query,
+        'categories': categories,
+        'artists': artists,
+        'category_filter': category_filter,
+        'artist_filter': artist_filter,
+    }
+    return render(request, 'app/homepage.html', context)
