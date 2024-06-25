@@ -24,8 +24,6 @@ class Category(models.Model):
 	def __str__(self):
 		return str(self.name)
 
-# TODO: implement auctioning dates
-
 class Customer(models.Model):
 	user = models.OneToOneField(User, on_delete=models.CASCADE)
 	avatar = models.ImageField(upload_to='img/', blank=True, null=True)
@@ -34,6 +32,8 @@ class Customer(models.Model):
 		verbose_name_plural = "Customers"
 	def __str__(self):
 		return str(self.user)
+	notify_outbid = models.BooleanField(default=True)
+	notify_auction_end = models.BooleanField(default=True)
 
 class Artwork(models.Model):
 	name = models.CharField(max_length=255)

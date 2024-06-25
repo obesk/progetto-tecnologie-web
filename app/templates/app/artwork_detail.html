@@ -44,16 +44,13 @@
       <div class="alert {% if message.tags %}
           
           
-          
-          
-          
           alert-{{ message.tags }}
         {% endif %}">{{ message }}</div>
     {% endfor %}
   {% endif %}
 
   {% comment %}menu for placing bids{% endcomment %}
-  <form action="{% url 'app:placebid' %}" method="post">
+  <form action="{% url 'app:placebid' %}" method="post" id="bid-form">
     {% csrf_token %}
     <input type="hidden" name="artwork_id" value="{{ artwork.id }}" />
     <div class="input-group">
@@ -81,48 +78,109 @@
     {% endfor %}
   </div>
 
-<script>
-  // Set the end date of the auction
-  var auctionEndDate = new Date("{{ object.auction_end|date:'Y-m-d H:i:s' }}").getTime();
+  <button id="enable-notifications" class="btn btn-primary mt-3">Enable Notifications</button>
 
-  // Update the countdown every 1 second
-  var x = setInterval(function() {
-
-    // Get today's date and time
-    var now = new Date().getTime();
-
-    // Find the distance between now and the auction end date
-    var distance = auctionEndDate - now;
-
-    // Time calculations for days, hours, minutes, and seconds
-    var days = Math.floor(distance / (1000 * 60 * 60 * 24));
-    var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-    var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-    // Display the result in the element with id="countdown"
-    var countdownElement = document.getElementById("countdown");
-    countdownElement.innerHTML = `
-      <span>${days}d</span> 
-      <span>${hours}h</span> 
-      <span>${minutes}m</span> 
-      <span>${seconds}s</span>`;
-
-    // Change color to red if less than 1 hour remains
-    if (distance < 3600000) { // 1 hour = 3600000 milliseconds
-      countdownElement.style.color = "red";
-    } else {
-      countdownElement.style.color = ""; // Reset color
-    }
-
-    // If the countdown is finished, write some text
-    if (distance < 0) {
-      clearInterval(x);
-      countdownElement.innerHTML = "EXPIRED";
-    }
-  }, 1000);
-</script>
-
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var auctionEndDate = new Date("{{ object.auction_end|date:'Y-m-d H:i:s' }}").getTime()
+    
+      console.log('Attempting WebSocket connection...')
+      function initWebSocket() {
+        var socket = new WebSocket('ws://' + window.location.host + '/ws/bids/{{ object.id }}/')
+    
+        socket.onopen = function (event) {
+          console.log('WebSocket connection established:', event)
+        }
+    
+        socket.onmessage = function (event) {
+          console.log('WebSocket message received:', event.data)
+          var data = JSON.parse(event.data)
+          var message = data['message']
+    
+          // Display notification
+          if (Notification.permission === 'granted') {
+            new Notification(message.title, { body: message.body })
+          }
+        }
+    
+        socket.onerror = function (event) {
+          console.error('WebSocket error observed:', event)
+        }
+    
+        socket.onclose = function (event) {
+          console.log('WebSocket connection closed. Reconnecting...', event)
+          setTimeout(initWebSocket, 5000)
+        }
+      }
+    
+      initWebSocket()
+    
+      document.getElementById('enable-notifications').addEventListener('click', function () {
+        if (Notification.permission !== 'granted') {
+          Notification.requestPermission().then(function (permission) {
+            if (permission === 'granted') {
+              new Notification('Notifications enabled!')
+            }
+          })
+        }
+      })
+    
+      document.getElementById('bid-form').onsubmit = function (event) {
+        event.preventDefault()
+        var form = event.target
+        var formData = new FormData(form)
+        fetch(form.action, {
+          method: form.method,
+          body: formData
+        })
+          .then((response) => {
+            console.log('Response:', response)
+            console.log('Content-Type:', response.headers.get('Content-Type'))
+            return response.text()
+          })
+          .then((data) => {
+            console.log('Server response:', data)
+            try {
+              var json = JSON.parse(data)
+              if (json.status === 'success') {
+                alert('Bid placed successfully')
+              } else {
+                alert(json.message)
+              }
+            } catch (error) {
+              console.error('Error parsing JSON:', error)
+            }
+          })
+      }
+    
+      var x = setInterval(function () {
+        var now = new Date().getTime()
+    
+        var distance = auctionEndDate - now
+    
+        var days = Math.floor(distance / (1000 * 60 * 60 * 24))
+        var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+        var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))
+        var seconds = Math.floor((distance % (1000 * 60)) / 1000)
+    
+        var countdownElement = document.getElementById('countdown')
+        countdownElement.innerHTML = `
+                    <span>${days}d</span> 
+                    <span>${hours}h</span> 
+                    <span>${minutes}m</span> 
+                    <span>${seconds}s</span>`
+    
+        if (distance < 3600000) {
+          countdownElement.style.color = 'red'
+        } else {
+          countdownElement.style.color = ''
+        }
+    
+        if (distance < 0) {
+          clearInterval(x)
+          countdownElement.innerHTML = 'EXPIRED'
+        }
+      }, 1000)
+    })
+  </script>
 {% endblock %}
-
-<br />
