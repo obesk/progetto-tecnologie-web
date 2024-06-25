@@ -6,12 +6,11 @@ from django.conf.urls.static import static
 app_name = "app"
 
 urlpatterns = [
-	path("artworklist/", ArtworksListView.as_view(), name="artworklist"),
-	path('seller/<int:seller_id>/auctioning-artworks/', SellerProfile.as_view(), name='seller-auctioning-artworks'),
+	path('seller/<int:seller_id>/auctioning-artworks/', SellerProfile.as_view(), name='seller_profile'),
 	path("artwork/<pk>", ArtworkDetailView.as_view(), name="artworkdetail"),
 	path("create_artwork/", ArtworkCreateView.as_view(), name="create_artwork"),
 	path("placebid/", placeBid, name="placebid"),
-	path("", homepage, name="homepage"),
+	path("", HomePageView.as_view(), name="homepage"),
 ]
 
 if settings.DEBUG:

@@ -8,39 +8,37 @@ from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Q
 from asgiref.sync import async_to_sync
-
 from django.http import JsonResponse
 from channels.layers import get_channel_layer
 
-
-
 from .models import Artwork, Photo, Bid, Customer, Category, Artist
 from .forms import ArtworkForm
+from .mixins import ArtworkFilterMixin
 
 import logging
 
 logger = logging.getLogger(__name__)
 
-class ArtworksListView(ListView):
-	title = "Artworks"
+class HomePageView(ArtworkFilterMixin, ListView):
 	model = Artwork
-	template_name = "app/artwork_list.html"
-	def get_queryset(self):
-		return Artwork.objects.filter(status=Artwork.Status.AUCTIONING)
+	template_name = 'app/homepage.html'
+	context_object_name = 'latest_offers'
+	queryset = Artwork.objects.filter(status=Artwork.Status.AUCTIONING)
 
-class SellerProfile(ListView):
-    model = Artwork
-    template_name = "app/artwork_list.html"
-    
-    def get_queryset(self):
-        self.seller = get_object_or_404(Customer, id=self.kwargs.get('seller_id'))
-        return Artwork.objects.filter(seller=self.seller, status=Artwork.Status.AUCTIONING)
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['title'] = f"{self.seller.user.username}'s Auctioning Artworks"
-        context['seller_name'] = self.seller.user.username
-        return context
+class SellerProfile(ArtworkFilterMixin, ListView):
+	model = Artwork
+	template_name = "app/seller_auctioning_artworks_list.html"
+	
+	def get_queryset(self):
+		self.seller = get_object_or_404(Customer, id=self.kwargs.get('seller_id'))
+		queryset = super().get_queryset()
+		return queryset.filter(seller=self.seller, status=Artwork.Status.AUCTIONING)
+	
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['title'] = f"{self.seller.user.username}'s Auctioning Artworks"
+		context['seller_name'] = self.seller.user.username
+		return context
 
 def save_uploaded_file(f):
 	filename = f"media/artwork_images/{f.name}"
@@ -65,6 +63,7 @@ class ArtworkCreateView(CreateView):
 
 class ArtworkDetailView(DetailView):
 	model = Artwork 
+
 	def get_recommendations(self):
 		artwork = self.object
 		all_artworks = Artwork.objects.exclude(id=artwork.id)
@@ -96,9 +95,8 @@ class ArtworkDetailView(DetailView):
 		context = super().get_context_data(**kwargs)
 		context['photos'] = self.object.Photos.all()
 		context['recommended_artworks'] = self.get_recommendations()
+		context['seller'] = self.object.seller
 		return context
-
-
 
 @csrf_protect
 def placeBid(request):
@@ -146,36 +144,3 @@ def placeBid(request):
 		except ValueError:
 			return JsonResponse({'status': 'error', 'message': 'Invalid bid amount.'})
 	return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
-
-
-def homepage(request):
-	query = request.GET.get('q')
-	category_filter = request.GET.get('category')
-	artist_filter = request.GET.get('artist')
-
-	latest_offers = Artwork.objects.filter(status=Artwork.Status.AUCTIONING).order_by('-publication_date')
-
-	if query:
-		latest_offers = latest_offers.filter(
-			Q(name__icontains=query) |
-			Q(description__icontains=query)
-		)
-	
-	if category_filter:
-		latest_offers = latest_offers.filter(category_id=category_filter)
-	
-	if artist_filter:
-		latest_offers = latest_offers.filter(artist_id=artist_filter)
-
-	categories = Category.objects.all()
-	artists = Artist.objects.all()
-
-	context = {
-		'latest_offers': latest_offers,
-		'query': query,
-		'categories': categories,
-		'artists': artists,
-		'category_filter': category_filter,
-		'artist_filter': artist_filter,
-	}
-	return render(request, 'app/homepage.html', context)

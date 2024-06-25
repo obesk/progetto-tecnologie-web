@@ -1,13 +1,16 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}
   Artwork detail
 {% endblock %}
 
 {% block content %}
-  <h1>Artwork Detail</h1>
-  {{ object.name }}
-  {{ object.artist }}
+  <h1>{{ object.name }}</h1>
+  <h2>by {{ object.artist }}</h2>
+
+  {% comment %}Seller Information{% endcomment %}
+  {% include 'app/partials/seller_card.html' with seller=seller %}
 
   {% comment %}menu for placing bids{% endcomment %}
   <div id="artworkCarousel" class="carousel slide" data-bs-ride="carousel">
@@ -33,15 +36,17 @@
     <div class="card text-center">
       <div class="card-header">Time Remaining</div>
       <div class="card-body">
-        <h3 class="card-title" id="countdown" style="font-size: 32px; font-weight: bold;"></h3>
+        <h3 class="card-title countdown" data-auction-end="{{ object.auction_end|date:'Y-m-d H:i:s' }}" style="font-size: 32px; font-weight: bold;"></h3>
       </div>
     </div>
   </div>
+
 
   {% comment %}list of messages{% endcomment %}
   {% if messages %}
     {% for message in messages %}
       <div class="alert {% if message.tags %}
+          
           
           
           alert-{{ message.tags }}
@@ -68,113 +73,11 @@
   <div class="row">
     {% for rec_artwork in recommended_artworks %}
       <div class="col-md-2">
-        {% include 'app/artwork_card.html' with artwork=rec_artwork size='small' %}
+        {% include 'app/partials/artwork_card.html' with artwork=rec_artwork size='small' %}
       </div>
     {% endfor %}
   </div>
   <button id="enable-notifications" class="btn btn-primary mt-3">Enable Notifications</button>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      var auctionEndDate = new Date("{{ object.auction_end|date:'Y-m-d H:i:s' }}").getTime()
-    
-      console.log('Attempting WebSocket connection...')
-      function initWebSocket() {
-        var socket = new WebSocket('ws://' + window.location.host + '/ws/bids/{{ object.id }}/')
-    
-        socket.onopen = function (event) {
-          console.log('WebSocket connection established:', event)
-        }
-    
-        socket.onmessage = function (event) {
-          console.log('WebSocket message received:', event.data)
-          var data = JSON.parse(event.data)
-          var message = data['message']
-    
-          // Display notification
-          if (Notification.permission === 'granted') {
-            new Notification(message.title, { body: message.body })
-          }
-        }
-    
-        socket.onerror = function (event) {
-          console.error('WebSocket error observed:', event)
-        }
-    
-        socket.onclose = function (event) {
-          console.log('WebSocket connection closed. Reconnecting...', event)
-          setTimeout(initWebSocket, 5000)
-        }
-      }
-    
-      initWebSocket()
-    
-      document.getElementById('enable-notifications').addEventListener('click', function () {
-        if (Notification.permission !== 'granted') {
-          Notification.requestPermission().then(function (permission) {
-            if (permission === 'granted') {
-              new Notification('Notifications enabled!')
-            }
-          })
-        }
-      })
-    
-      document.getElementById('bid-form').onsubmit = function (event) {
-        event.preventDefault()
-        var form = event.target
-        var formData = new FormData(form)
-        fetch(form.action, {
-          method: form.method,
-          body: formData
-        })
-          .then((response) => {
-            console.log('Response:', response)
-            console.log('Content-Type:', response.headers.get('Content-Type'))
-            return response.text()
-          })
-          .then((data) => {
-            console.log('Server response:', data)
-            try {
-              var json = JSON.parse(data)
-              if (json.status === 'success') {
-                alert('Bid placed successfully')
-              } else {
-                alert(json.message)
-              }
-            } catch (error) {
-              console.error('Error parsing JSON:', error)
-            }
-          })
-      }
-    
-      var x = setInterval(function () {
-        var now = new Date().getTime()
-    
-        var distance = auctionEndDate - now
-    
-        var days = Math.floor(distance / (1000 * 60 * 60 * 24))
-        var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-        var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))
-        var seconds = Math.floor((distance % (1000 * 60)) / 1000)
-    
-        var countdownElement = document.getElementById('countdown')
-        countdownElement.innerHTML = `
-                    <span>${days}d</span> 
-                    <span>${hours}h</span> 
-                    <span>${minutes}m</span> 
-                    <span>${seconds}s</span>`
-    
-        if (distance < 3600000) {
-          countdownElement.style.color = 'red'
-        } else {
-          countdownElement.style.color = ''
-        }
-    
-        if (distance < 0) {
-          clearInterval(x)
-          countdownElement.innerHTML = 'EXPIRED'
-        }
-      }, 1000)
-    })
-  </script>
+  <script src="{% static 'js/countdown.js' %}"></script>
 {% endblock %}

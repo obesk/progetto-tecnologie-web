@@ -32,3 +32,14 @@ class ArtworkForm(forms.ModelForm):
 			'publication_date': forms.DateInput(attrs={'type': 'date'}),
 			'auction_end': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
 		}
+
+
+class ArtworkFilterForm(forms.Form):
+	q = forms.CharField(required=False, label='Search', widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Search by title or description...'}))
+	category = forms.ModelChoiceField(queryset=Category.objects.all(), required=False, label='Category', widget=forms.Select(attrs={'class': 'form-select'}))
+	artist = forms.ModelChoiceField(queryset=Artist.objects.all(), required=False, label='Artist', widget=forms.Select(attrs={'class': 'form-select'}))
+	sort_by = forms.ChoiceField(choices=[
+		('', 'Sort by'),
+		('price', 'Price'),
+		('auction_end', 'Auction End Date'),
+	], required=False, widget=forms.Select(attrs={'class': 'form-select'}))

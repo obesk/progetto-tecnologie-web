@@ -13,7 +13,7 @@ class Artist(models.Model):
 	biography = models.TextField()
 	birthday = models.DateField()
 	def __str__(self):
-		return f"{self.name} {self.surname}, born in {self.birthday}"
+		return f"{self.name} {self.surname}"
 
 class Category(models.Model):
 	name = models.CharField(max_length=120)

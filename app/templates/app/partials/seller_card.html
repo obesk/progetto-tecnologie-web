@@ -1,0 +1,19 @@
+<div class="card mb-4">
+  <div class="row no-gutters">
+    <div class="col-md-4">
+      {% if seller.avatar %}
+        <img src="{{ seller.avatar.url }}" class="card-img" alt="{{ seller.user.username }}">
+      {% else %}
+        {% comment %} <img src="{% static 'default_avatar.png' %}" class="card-img" alt="{{ seller.user.username }}"> {% endcomment %}
+      {% endif %}
+    </div>
+    <div class="col-md-8">
+      <div class="card-body">
+        <h5 class="card-title">{{ seller.user.username }}</h5>
+        <p class="card-text">
+          <a href="{% url 'app:seller_profile' seller.id %}" class="btn btn-primary">View Seller Profile</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

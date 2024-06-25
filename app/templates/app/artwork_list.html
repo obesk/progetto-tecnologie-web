@@ -1,33 +1,24 @@
 {% extends 'base.html' %}
 
-
 {% block title %}
   {{ seller_name }}'s Auctioning Artworks
 {% endblock %}
 
-
 {% block content %}
-  <h1>{{ seller_name }} Artwork List</h1>
-
-  <br />
-
-  {% for art in object_list %}
-    <br />
-    <a href="{% url "app:artworkdetail" art.pk %}">
-      <div class="card">
-        <div class="card-header">{{ art.name }}</div>
-        <div class="card-body">
-          <h5 class="card-title">{{ art.artist }}</h5>
-          <p class="card-text">{{ art }}</p>
-          {% if art.available %}
-            <p style="color: green">DISPONIBILE</p>
-          {% else %}
-            <p style="color: red">NON DISPONIBILE</p>
-          {% endif %}
-        </div>
+  <h1>{{ seller_name }}'s Auctioning Artworks</h1>
+  
+  <!-- Search Form -->
+  {% include 'app/partials/artwork_filter_form.html' %}
+  
+  <div class="row">
+    {% for artwork in object_list %}
+      <div class="col-md-4">
+        {% include 'app/partials/artwork_card.html' with artwork=artwork size='large' %}
       </div>
-    </a>
-    <br />
-  {% endfor %}
+    {% endfor %}
+  </div>
+  
+  {% if not object_list %}
+    <p>No auctioning artworks available.</p>
+  {% endif %}
 {% endblock %}
-<br />
