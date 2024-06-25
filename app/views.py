@@ -17,8 +17,6 @@ from channels.layers import get_channel_layer
 from .models import Artwork, Photo, Bid, Customer, Category, Artist
 from .forms import ArtworkForm
 
-import os
-
 import logging
 
 logger = logging.getLogger(__name__)
@@ -27,9 +25,25 @@ class ArtworksListView(ListView):
 	title = "Artworks"
 	model = Artwork
 	template_name = "app/artwork_list.html"
+	def get_queryset(self):
+		return Artwork.objects.filter(status=Artwork.Status.AUCTIONING)
+
+class SellerProfile(ListView):
+    model = Artwork
+    template_name = "app/artwork_list.html"
+    
+    def get_queryset(self):
+        self.seller = get_object_or_404(Customer, id=self.kwargs.get('seller_id'))
+        return Artwork.objects.filter(seller=self.seller, status=Artwork.Status.AUCTIONING)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = f"{self.seller.user.username}'s Auctioning Artworks"
+        context['seller_name'] = self.seller.user.username
+        return context
 
 def save_uploaded_file(f):
-	filename = 	f"media/artwork_images/{f.name}"
+	filename = f"media/artwork_images/{f.name}"
 	with open(filename, "wb+") as destination:
 		for chunk in f.chunks():
 			destination.write(chunk)

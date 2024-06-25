@@ -68,16 +68,10 @@
   <div class="row">
     {% for rec_artwork in recommended_artworks %}
       <div class="col-md-2">
-        <div class="card mb-2">
-          <img src="{{ rec_artwork.Photos.first.file.url }}" class="card-img-top" alt="{{ rec_artwork.name }}" />
-          <div class="card-body">
-            <h5 class="card-title">{{ rec_artwork.name }}</h5>
-          </div>
-        </div>
+        {% include 'app/artwork_card.html' with artwork=rec_artwork size='small' %}
       </div>
     {% endfor %}
   </div>
-
   <button id="enable-notifications" class="btn btn-primary mt-3">Enable Notifications</button>
 
   <script>

@@ -1,0 +1,15 @@
+<!-- templates/app/artwork_card.html -->
+<a href="{% url 'app:artworkdetail' artwork.pk %}" class="text-decoration-none">
+  <div class="card mb-2">
+    {% if artwork.Photos.first %}
+      <img src="{{ artwork.Photos.first.file.url }}" class="card-img-top" alt="{{ artwork.name }}">
+    {% endif %}
+    <div class="card-body">
+      <h5 class="card-title">{{ artwork.name }}</h5>
+      <p class="card-text">Artist: {{ artwork.artist.name }} {{ artwork.artist.surname }}</p>
+      <p class="card-text">Category: {{ artwork.category.name }}</p>
+      <p class="card-text">Ends: {{ artwork.auction_end|date:"F j, Y, g:i a" }}</p>
+      <p class="card-text">Current Price: €{{ artwork.price }}</p>
+    </div>
+  </div>
+</a>
