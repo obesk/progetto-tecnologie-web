@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  Artwork Detail - Seller View
+{% endblock %}
+
+{% block content %}
+  <h1>{{ object.name }}</h1>
+  <p>Artist: {{ object.artist }}</p>
+  <p>Category: {{ object.category }}</p>
+  <p>Description: {{ object.description }}</p>
+
+  {% include 'app/partials/artwork_carousel.html' with photos=photos %}
+
+  {% comment %}Cancel auction form{% endcomment %}
+  <form method="post" action="{% url 'app:artwork_manage' object.pk %}">
+    {% csrf_token %}
+    {{ cancel_form.as_p }}
+    <button type="submit" class="btn btn-danger" name="cancel_auction" value="1">Cancel Auction</button>
+  </form>
+
+  {% comment %}Auction history{% endcomment %}
+  <h2>Auction History</h2>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th scope="col">Bidder</th>
+        <th scope="col">Amount</th>
+        <th scope="col">Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for bid in bids %}
+        <tr>
+          <td>{{ bid.customer.user.username }}</td>
+          <td>€{{ bid.amount }}</td>
+          <td>{{ bid.date_posted }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+
+{% endblock %}
+

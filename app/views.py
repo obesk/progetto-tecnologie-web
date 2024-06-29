@@ -11,8 +11,8 @@ from asgiref.sync import async_to_sync
 from django.http import JsonResponse
 from channels.layers import get_channel_layer
 
-from .models import Artwork, Photo, Bid, Customer, Category, Artist
-from .forms import ArtworkForm
+from .models import Artwork, Photo, Bid, Customer
+from .forms import ArtworkForm, CancelAuctionForm
 from .mixins import ArtworkFilterMixin
 
 import logging
@@ -97,6 +97,26 @@ class ArtworkDetailView(DetailView):
 		context['recommended_artworks'] = self.get_recommendations()
 		context['seller'] = self.object.seller
 		return context
+
+class SellerArtworkDetailView(DetailView):
+	model = Artwork
+	template_name = "app/artwork_manage.html"
+
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['photos'] = self.object.Photos.all()
+		context['bids'] = self.object.Bids.all().order_by('-amount')
+		context['cancel_form'] = CancelAuctionForm()
+		return context
+
+	def post(self, request, *args, **kwargs):
+		artwork = self.get_object()
+		if request.POST.get("cancel_auction"):
+			artwork.cancel_auction()
+			messages.success(request, 'The auction has been cancelled.')
+			return redirect('app:artwork_manage', pk=artwork.pk)
+		return self.get(request, *args, **kwargs)
+
 
 @csrf_protect
 def placeBid(request):

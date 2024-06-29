@@ -3,6 +3,7 @@ from .models import Artist, Category, Artwork, Photo
 
 
 
+
 class MultipleFileInput(forms.ClearableFileInput):
 	allow_multiple_selected = True
 
@@ -20,6 +21,8 @@ class MultipleFileField(forms.FileField):
 			result = [single_file_clean(data, initial)]
 		return result
 
+class CancelAuctionForm(forms.Form):
+	cancel_auction = forms.BooleanField(widget=forms.HiddenInput, initial=True)
 
 class ArtworkForm(forms.ModelForm):
 	images = MultipleFileField()

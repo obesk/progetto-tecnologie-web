@@ -40,7 +40,7 @@ class Artwork(models.Model):
 	artist = models.ForeignKey(Artist, on_delete=models.PROTECT, related_name="Artworks")
 	category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name="Artworks")
 	publication_date = models.DateField()
-	auction_end = models.DateTimeField(default=timezone.now() + timedelta(days=7))
+	auction_end = models.DateTimeField(default=timezone.now() + timedelta(days=7), null=True)
 	seller = models.ForeignKey(Customer, on_delete=models.CASCADE, limit_choices_to={'is_seller': True}, null=True)
 
 	description = models.TextField(max_length=255, default="")
@@ -56,6 +56,12 @@ class Artwork(models.Model):
 		default = Status.HIDDEN,
 	)
 
+	def cancel_auction(self):
+		self.status = self.Status.HIDDEN
+		self.auction_end = None
+
+		self.save()
+
 	def available(self):
 		return self.status == self.Status.AUCTIONING
 
@@ -65,7 +71,6 @@ class Artwork(models.Model):
 	
 	def __str__(self):
 		return f"Artwork {self.name} ({self.publication_date}), made by the artist: {self.artist}"
-
 
 
 class Bid(models.Model):

@@ -10,6 +10,7 @@ urlpatterns = [
 	path("artwork/<pk>", ArtworkDetailView.as_view(), name="artworkdetail"),
 	path("create_artwork/", ArtworkCreateView.as_view(), name="create_artwork"),
 	path("placebid/", placeBid, name="placebid"),
+	path('artworkmanage/<int:pk>/', SellerArtworkDetailView.as_view(), name='artwork_manage'),
 	path("", HomePageView.as_view(), name="homepage"),
 ]
 
