@@ -1,4 +1,5 @@
 from django.shortcuts import redirect, get_object_or_404, render
+from django.contrib.auth.decorators import login_required
 from django.views.generic.list import ListView
 from django.views.generic import DetailView
 from django.views.generic.edit import CreateView
@@ -6,6 +7,7 @@ from django.urls import reverse_lazy
 from django.views.decorators.csrf import csrf_protect
 from django.contrib import messages
 from django.utils import timezone
+from datetime import timedelta
 from django.db.models import Q
 from asgiref.sync import async_to_sync
 from django.http import JsonResponse
@@ -13,7 +15,7 @@ from channels.layers import get_channel_layer
 
 from .models import Artwork, Photo, Bid, Customer
 from .forms import ArtworkForm, CancelAuctionForm
-from .mixins import ArtworkFilterMixin
+from .mixins import ArtworkFilterMixin, OwnedBySellerRequired, SellerRequired, OwnedBySellerRequired
 
 import logging
 
@@ -41,16 +43,16 @@ class SellerProfile(ArtworkFilterMixin, ListView):
 		return context
 
 def save_uploaded_file(f):
-	filename = f"media/artwork_images/{f.name}"
+	filename = f"media/app/static/artwork_images/{f.name}"
 	with open(filename, "wb+") as destination:
 		for chunk in f.chunks():
 			destination.write(chunk)
 	return filename
 
-class ArtworkCreateView(CreateView):
+class ArtworkCreateView(SellerRequired, CreateView):
 	form_class = ArtworkForm
 	template_name = "app/create_artwork.html"
-	success_url = reverse_lazy("app:artworklist")
+	success_url = reverse_lazy("app:homepage")
 
 	def form_valid(self, form):
 		files = form.cleaned_data["images"]
@@ -80,7 +82,10 @@ class ArtworkDetailView(DetailView):
 			if other_artwork.artist == artwork.artist:
 				score += 8
 
-			time_to_expiry = other_artwork.auction_end - timezone.now()
+			if other_artwork.auction_end:
+				time_to_expiry = other_artwork.auction_end - timezone.now()
+			else:
+				time_to_expiry = timedelta(seconds=0)
 			if time_to_expiry.total_seconds() > 0:
 				score += max(0, (7 * 24 * 3600 - time_to_expiry.total_seconds()) / (7 * 24 * 3600)) * 10
 
@@ -98,7 +103,8 @@ class ArtworkDetailView(DetailView):
 		context['seller'] = self.object.seller
 		return context
 
-class SellerArtworkDetailView(DetailView):
+
+class SellerArtworkDetailView(OwnedBySellerRequired, DetailView):
 	model = Artwork
 	template_name = "app/artwork_manage.html"
 
@@ -118,6 +124,7 @@ class SellerArtworkDetailView(DetailView):
 		return self.get(request, *args, **kwargs)
 
 
+@login_required
 @csrf_protect
 def placeBid(request):
 	if request.method == 'POST':
@@ -125,6 +132,10 @@ def placeBid(request):
 		customer = Customer.objects.get(user=user)
 		artwork_id = request.POST.get('artwork_id')
 		artwork = get_object_or_404(Artwork, id=artwork_id)
+
+		if artwork.seller.user == user:
+			return JsonResponse({'status': 'error', 'message': "you can't place bids on your own items"})
+
 		channel_layer = get_channel_layer()
 
 		if channel_layer is None:
