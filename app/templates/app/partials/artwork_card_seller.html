@@ -1,0 +1,7 @@
+{% extends 'app/partials/artwork_card.html' %}
+
+{% block other_content %}
+  {% if is_seller %}
+    <a href="{% url 'app:artwork_manage' artwork.pk %}" class="btn btn-primary">Manage Artwork</a>
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends 'app/partials/artwork_card.html' %}
+
+{% block other_content %}
+  <p class="card-text">Your Bid: €{{ customer_bid }}</p>
+  {% if is_winning %}
+    <p class="card-text text-success">You are currently winning</p>
+  {% else %}
+    <p class="card-text text-danger">You are outbid</p>
+  {% endif %}
+{% endblock %}

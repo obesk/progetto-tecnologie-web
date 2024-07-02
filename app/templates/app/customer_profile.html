@@ -9,9 +9,11 @@
 
   <h2>Bidded Artworks</h2>
   <div class="row">
-    {% for artwork in object_list %}
-      <div class="col-md-2">
-        {% include 'app/partials/artwork_card.html' with artwork=artwork size='small' %}
+    {% for item in bidded_artworks %}
+      <div class="col-md-3">
+        {% with artwork=item.artwork customer_bid=item.customer_bid is_winning=item.is_winning %}
+          {% include 'app/partials/artwork_card_customer.html' %}
+        {% endwith %}
       </div>
     {% endfor %}
   </div>

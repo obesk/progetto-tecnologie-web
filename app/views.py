@@ -1,7 +1,7 @@
 from django.shortcuts import redirect, get_object_or_404, render
 from django.contrib.auth.decorators import login_required
 from django.views.generic.list import ListView
-from django.views.generic import DetailView
+from django.views.generic import DetailView, TemplateView
 from django.views.generic.edit import CreateView
 from django.urls import reverse_lazy
 from django.views.decorators.csrf import csrf_protect
@@ -37,24 +37,34 @@ class SellerProfile(ArtworkFilterMixin, ListView):
 		return queryset.filter(seller=self.seller, status=Artwork.Status.AUCTIONING)
 	
 	def get_context_data(self, **kwargs):
+		user  = self.request.user
+		customer = Customer.objects.get(user=user)
 		context = super().get_context_data(**kwargs)
 		context['title'] = f"{self.seller.user.username}'s Auctioning Artworks"
 		context['seller_name'] = self.seller.user.username
+		context['isseller'] = customer.is_seller
 		return context
 
-class CustomerProfile(ListView, CustomerRequired):
+class CustomerProfile(TemplateView, CustomerRequired):
 	model = Customer
 	template_name = "app/customer_profile.html"
 	
-	def get_queryset(self):
-		customer = self.request.user.customer
-		artworks = Artwork.objects.filter(Bids__customer=customer).distinct().order_by("auction_end")
-		return artworks
-	
 	def get_context_data(self, **kwargs):
-		context = super().get_context_data(**kwargs)
 		customer = self.request.user.customer
+		bidded_artworks = []
+		artworks = Artwork.objects.filter(Bids__customer=customer).distinct().order_by("auction_end")
+		for artwork in artworks:
+			highest_bid = artwork.Bids.order_by('-amount').first()
+			is_winning = highest_bid.customer == customer if highest_bid else False
+			customer_bid = artwork.Bids.filter(customer=customer).order_by('-amount').first()
+			bidded_artworks.append({
+				'artwork': artwork,
+				'customer_bid': customer_bid.amount if customer_bid else None,
+				'is_winning': is_winning
+			})
+		context = super().get_context_data(**kwargs)
 		context['customer'] = customer
+		context['bidded_artworks'] = bidded_artworks
 		context['title'] = f"{self.request.user.username}'s Auctioning Artworks"
 		return context
 
