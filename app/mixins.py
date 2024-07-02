@@ -55,3 +55,14 @@ class SellerRequired:
 
 		return super().dispatch(request, *args, **kwargs)
 
+class CustomerRequired:
+	def dispatch(self, request, *args, **kwargs):
+		user = request.user
+		if not user.is_authenticated :
+			raise PermissionDenied("You need to login to view your profile")
+		
+		customer = Customer.objects.get(user=user)
+		if customer.is_seller:
+			raise PermissionDenied("You need to be a customer to view your profile")
+
+		return super().dispatch(request, *args, **kwargs)

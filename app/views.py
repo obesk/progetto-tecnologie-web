@@ -15,7 +15,7 @@ from channels.layers import get_channel_layer
 
 from .models import Artwork, Photo, Bid, Customer
 from .forms import ArtworkForm, CancelAuctionForm
-from .mixins import ArtworkFilterMixin, OwnedBySellerRequired, SellerRequired, OwnedBySellerRequired
+from .mixins import ArtworkFilterMixin, OwnedBySellerRequired, SellerRequired, OwnedBySellerRequired, CustomerRequired
 
 import logging
 
@@ -40,6 +40,22 @@ class SellerProfile(ArtworkFilterMixin, ListView):
 		context = super().get_context_data(**kwargs)
 		context['title'] = f"{self.seller.user.username}'s Auctioning Artworks"
 		context['seller_name'] = self.seller.user.username
+		return context
+
+class CustomerProfile(ListView, CustomerRequired):
+	model = Customer
+	template_name = "app/customer_profile.html"
+	
+	def get_queryset(self):
+		customer = self.request.user.customer
+		artworks = Artwork.objects.filter(Bids__customer=customer).distinct().order_by("auction_end")
+		return artworks
+	
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		customer = self.request.user.customer
+		context['customer'] = customer
+		context['title'] = f"{self.request.user.username}'s Auctioning Artworks"
 		return context
 
 def save_uploaded_file(f):
