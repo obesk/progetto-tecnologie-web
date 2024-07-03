@@ -1,23 +1,25 @@
 {% extends 'base.html' %}
 
 {% block title %}
-  {{ seller_name }}'s Auctioning Artworks
+  {{ title }}
 {% endblock %}
 
 {% block content %}
-  <h1>{{ seller_name }}'s Auctioning Artworks</h1>
-  
+  <h1>{{ title }}</h1>
+
   <!-- Search Form -->
   {% include 'app/partials/artwork_filter_form.html' %}
-  
+
   <div class="row">
     {% for artwork in object_list %}
       <div class="col-md-4">
-        {% include 'app/partials/artwork_card.html' with artwork=artwork size='large' %}
+        {% with artwork=artwork %}
+          {% include 'app/partials/artwork_card_seller.html' %}
+        {% endwith %}
       </div>
     {% endfor %}
   </div>
-  
+
   {% if not object_list %}
     <p>No auctioning artworks available.</p>
   {% endif %}

@@ -42,7 +42,24 @@ class SellerProfile(ArtworkFilterMixin, ListView):
 		context = super().get_context_data(**kwargs)
 		context['title'] = f"{self.seller.user.username}'s Auctioning Artworks"
 		context['seller_name'] = self.seller.user.username
-		context['isseller'] = customer.is_seller
+		return context
+
+class SellerArtworkManagement(SellerRequired, ArtworkFilterMixin, ListView):
+	model = Artwork
+	template_name = "app/seller_manage_artworks.html"
+	
+	def get_queryset(self):
+		self.seller = get_object_or_404(Customer, user  = self.request.user)
+
+		queryset = super().get_queryset()
+		return queryset.filter(seller=self.seller)
+	
+	def get_context_data(self, **kwargs):
+		user  = self.request.user
+		customer = Customer.objects.get(user=user)
+		context = super().get_context_data(**kwargs)
+		context['title'] = f"{self.seller.user.username}'s Artworks Management"
+		context['seller_name'] = self.seller.user.username
 		return context
 
 class CustomerProfile(TemplateView, CustomerRequired):

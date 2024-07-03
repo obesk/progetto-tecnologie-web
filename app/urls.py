@@ -8,6 +8,7 @@ app_name = "app"
 urlpatterns = [
 	path('seller/<int:seller_id>/', SellerProfile.as_view(), name='seller_profile'),
 	path('customerprofile/', CustomerProfile.as_view(), name='customer_profile'),
+	path('manageartworks/', SellerArtworkManagement.as_view(), name='manage_artworks'),
 	path("artwork/<pk>", ArtworkDetailView.as_view(), name="artworkdetail"),
 	path("create_artwork/", ArtworkCreateView.as_view(), name="create_artwork"),
 	path("placebid/", placeBid, name="placebid"),
