@@ -43,7 +43,7 @@ class SellerProfile(ArtworkFilterMixin, ListView):
     def get_queryset(self):
         self.seller = get_object_or_404(AppUser, id=self.kwargs.get("seller_id"))
         queryset = super().get_queryset()
-        return queryset.filter(seller=self.seller, status=Artwork.Status.AUCTIONING)
+        return queryset.filter(seller=self.seller)
 
     def get_context_data(self, **kwargs):
         user = self.request.user
@@ -117,8 +117,10 @@ class ArtworkCreateView(SellerRequired, CreateView):
     success_url = reverse_lazy("app:homepage")
 
     def form_valid(self, form):
+        form.instance.seller = self.request.user.appuser
         files = form.cleaned_data["images"]
         artwork = form.save()
+
         for f in files:
             filename = save_uploaded_file(f)
             photo = Photo(file=filename, artwork=artwork)
@@ -268,4 +270,4 @@ def placeBid(request):
             return redirect("app:artworkdetail", pk=artwork_id)
     else:
         messages.error(request, "Invalid request method.")
-        return redirect("app:artworklist")
+        return redirect("app:homepage")

@@ -42,7 +42,6 @@
     {% endfor %}
   </div>
 
-  {% comment %}Cancel auction form{% endcomment %}
   <form method="post" action="{% url 'app:artwork_manage' object.pk %}" class="mb-3">
     {% csrf_token %}
     {{ cancel_form.as_p }}
@@ -50,7 +49,6 @@
   </form>
 
   <h2>Bids</h2>
-  {% comment %}Auction history{% endcomment %}
   <h2>Auction History</h2>
   <table class="table table-striped">
     <thead>
