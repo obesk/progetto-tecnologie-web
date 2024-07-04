@@ -24,12 +24,12 @@ class Category(models.Model):
 	def __str__(self):
 		return str(self.name)
 
-class Customer(models.Model):
+class AppUser(models.Model):
 	user = models.OneToOneField(User, on_delete=models.CASCADE)
 	avatar = models.ImageField(upload_to='img/', blank=True, null=True)
 	is_seller = models.BooleanField(default=False)
 	class Meta:
-		verbose_name_plural = "Customers"
+		verbose_name_plural = "Users"
 	def __str__(self):
 		return str(self.user)
 	notify_outbid = models.BooleanField(default=True)
@@ -41,7 +41,7 @@ class Artwork(models.Model):
 	category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name="Artworks")
 	publication_date = models.DateField()
 	auction_end = models.DateTimeField(default=timezone.now() + timedelta(days=7), null=True)
-	seller = models.ForeignKey(Customer, on_delete=models.CASCADE, limit_choices_to={'is_seller': True}, null=True)
+	seller = models.ForeignKey(AppUser, on_delete=models.CASCADE, limit_choices_to={'is_seller': True}, null=True)
 
 	description = models.TextField(max_length=255, default="")
 
@@ -75,7 +75,7 @@ class Artwork(models.Model):
 
 class Bid(models.Model):
 	artwork = models.ForeignKey(Artwork, on_delete=models.CASCADE, related_name="Bids")
-	customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name="Bids")
+	customer = models.ForeignKey(AppUser, on_delete=models.CASCADE, related_name="Bids")
 	amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 	class Meta:
 		verbose_name_plural = "Bids"

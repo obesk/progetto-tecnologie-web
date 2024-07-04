@@ -1,6 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .forms import ArtworkFilterForm
-from .models import Customer
+from .models import AppUser
 from django.db.models import Q, Max
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import PermissionDenied
@@ -49,8 +49,8 @@ class SellerRequired:
 		if not user.is_authenticated :
 			raise PermissionDenied("You need to login to create an artwork")
 		
-		customer = Customer.objects.get(user=user)
-		if not customer.is_seller:
+		app_user = AppUser.objects.get(user=user)
+		if not app_user.is_seller:
 			raise PermissionDenied("You need to be a seller to post an artork")
 
 		return super().dispatch(request, *args, **kwargs)
@@ -61,8 +61,8 @@ class CustomerRequired:
 		if not user.is_authenticated :
 			raise PermissionDenied("You need to login to view your profile")
 		
-		customer = Customer.objects.get(user=user)
-		if customer.is_seller:
+		app_user = AppUser.objects.get(user=user)
+		if app_user.is_seller:
 			raise PermissionDenied("You need to be a customer to view your profile")
 
 		return super().dispatch(request, *args, **kwargs)

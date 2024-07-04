@@ -14,7 +14,7 @@ from asgiref.sync import async_to_sync
 from django.http import JsonResponse
 from channels.layers import get_channel_layer
 
-from .models import Artwork, Photo, Bid, Customer
+from .models import Artwork, Photo, Bid, AppUser
 from .forms import ArtworkForm, CancelAuctionForm
 from .mixins import ArtworkFilterMixin, OwnedBySellerRequired, SellerRequired, OwnedBySellerRequired, CustomerRequired
 
@@ -33,13 +33,12 @@ class SellerProfile(ArtworkFilterMixin, ListView):
 	template_name = "app/seller_auctioning_artworks_list.html"
 	
 	def get_queryset(self):
-		self.seller = get_object_or_404(Customer, id=self.kwargs.get('seller_id'))
+		self.seller = get_object_or_404(AppUser, id=self.kwargs.get('seller_id'))
 		queryset = super().get_queryset()
 		return queryset.filter(seller=self.seller, status=Artwork.Status.AUCTIONING)
 	
 	def get_context_data(self, **kwargs):
 		user  = self.request.user
-		customer = Customer.objects.get(user=user)
 		context = super().get_context_data(**kwargs)
 		context['title'] = f"{self.seller.user.username}'s Auctioning Artworks"
 		context['seller_name'] = self.seller.user.username
@@ -50,25 +49,24 @@ class SellerArtworkManagement(SellerRequired, ArtworkFilterMixin, ListView):
 	template_name = "app/seller_manage_artworks.html"
 	
 	def get_queryset(self):
-		self.seller = get_object_or_404(Customer, user  = self.request.user)
+		self.seller = get_object_or_404(AppUser, user  = self.request.user)
 
 		queryset = super().get_queryset()
 		return queryset.filter(seller=self.seller)
 	
 	def get_context_data(self, **kwargs):
 		user  = self.request.user
-		customer = Customer.objects.get(user=user)
 		context = super().get_context_data(**kwargs)
 		context['title'] = f"{self.seller.user.username}'s Artworks Management"
 		context['seller_name'] = self.seller.user.username
 		return context
 
 class CustomerProfile(TemplateView, CustomerRequired):
-	model = Customer
+	model = AppUser
 	template_name = "app/customer_profile.html"
 	
 	def get_context_data(self, **kwargs):
-		customer = self.request.user.customer
+		customer = self.request.user.appuser
 		bidded_artworks = []
 		artworks = Artwork.objects.filter(Bids__customer=customer).distinct().order_by("auction_end")
 		for artwork in artworks:
@@ -191,7 +189,7 @@ class SellerArtworkManage(OwnedBySellerRequired, UpdateView):
 def placeBid(request):
 	if request.method == 'POST':
 		user = request.user
-		customer = Customer.objects.get(user=user)
+		customer = AppUser.objects.get(user=user)
 		artwork_id = request.POST.get('artwork_id')
 		artwork = get_object_or_404(Artwork, id=artwork_id)
 

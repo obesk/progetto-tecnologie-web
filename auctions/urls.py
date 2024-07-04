@@ -2,9 +2,8 @@ from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from django.views.generic import CreateView
-from .views import HomeView, CustomerRegistrationView
+from .views import CustomerRegistrationView
 
-#TODO: manage views
 urlpatterns = [
 	path("admin/", admin.site.urls),
 	path("", include("app.urls")),
