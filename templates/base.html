@@ -43,8 +43,13 @@
               <a class="nav-link dropdown-toggle link-light" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">{{ user.username }}</a>
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                 <li>
-                  <a class="dropdown-item" href="app:customer_profile">Profile</a>
+                  <a class="dropdown-item" href="{% url 'app:customer_profile' %}">Profile</a>
                 </li>
+                {% if user.appuser.is_seller %}
+                  <li>
+                    <a class="dropdown-item" href="{% url 'app:manage_artworks' %}">Manage Artworks</a>
+                  </li>
+                {% endif %}
                 <li>
                   <a class="dropdown-item" href="{% url 'app:logout' %}">Logout</a>
                 </li>
@@ -52,7 +57,7 @@
             </li>
           {% else %}
             <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle link-light" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">UNAUTENTICATED</a>
+              <a class="nav-link dropdown-toggle link-light" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">UNAUTHENTICATED</a>
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                 <li>
                   <a class="dropdown-item" href="{% url 'app:login' %}">Login</a>
