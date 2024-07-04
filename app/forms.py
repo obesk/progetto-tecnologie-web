@@ -1,4 +1,6 @@
 from django import forms
+from django.urls import reverse_lazy
+from django.utils import timezone
 from .models import Artist, Category, Artwork, Photo
 
 
@@ -34,6 +36,7 @@ class ArtworkForm(forms.ModelForm):
             "name",
             "artist",
             "category",
+            "description",
             "publication_date",
             "images",
             "auction_end",
@@ -42,6 +45,25 @@ class ArtworkForm(forms.ModelForm):
             "publication_date": forms.DateInput(attrs={"type": "date"}),
             "auction_end": forms.DateTimeInput(attrs={"type": "datetime-local"}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super(ArtworkForm, self).__init__(*args, **kwargs)
+        self.fields["description"].required = False
+        self.fields["images"].required = False
+
+    def clean_publication_date(self):
+        publication_date = self.cleaned_data.get("publication_date")
+        if publication_date > timezone.now().date():
+            raise forms.ValidationError("The publication date must be in the past.")
+        return publication_date
+
+    def clean_auction_end(self):
+        auction_end = self.cleaned_data.get("auction_end")
+        if auction_end < timezone.now() + timezone.timedelta(hours=1):
+            raise forms.ValidationError(
+                "The auction end date must be at least an hour from now."
+            )
+        return auction_end
 
 
 class ArtworkFilterForm(forms.Form):

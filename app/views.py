@@ -111,13 +111,12 @@ def save_uploaded_file(f):
     with open(filename, "wb+") as destination:
         for chunk in f.chunks():
             destination.write(chunk)
-    return filename
+    return filename[len("media/") :]
 
 
 class ArtworkCreateView(SellerRequired, CreateView):
     form_class = ArtworkForm
     template_name = "app/create_artwork.html"
-    success_url = reverse_lazy("app:homepage")
 
     def form_valid(self, form):
         form.instance.seller = self.request.user.appuser
@@ -129,6 +128,9 @@ class ArtworkCreateView(SellerRequired, CreateView):
             photo = Photo(file=filename, artwork=artwork)
             photo.save()
         return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy("app:artwork_manage", kwargs={"pk": self.object.pk})
 
 
 class ArtworkDetailView(ArtworkBiddable, DetailView):
