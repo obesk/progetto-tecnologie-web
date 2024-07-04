@@ -1,10 +1,12 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import Http404
 from .forms import ArtworkFilterForm
-from .models import AppUser
+from .models import AppUser, Artwork
 from django.db.models import Q, Max
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import PermissionDenied
 from django.core.exceptions import PermissionDenied
+from django.utils import timezone
 
 
 class ArtworkFilterMixin:
@@ -73,4 +75,15 @@ class CustomerRequired:
         if app_user.is_seller:
             raise PermissionDenied("You need to be a customer to view your profile")
 
+        return super().dispatch(request, *args, **kwargs)
+
+
+class ArtworkBiddable:
+    def dispatch(self, request, *args, **kwargs):
+        artwork = self.get_object()
+        if (
+            artwork.status != Artwork.Status.AUCTIONING
+            or artwork.auction_end < timezone.now()
+        ):
+            raise Http404("This artwork is not available for bidding.")
         return super().dispatch(request, *args, **kwargs)

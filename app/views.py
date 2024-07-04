@@ -17,6 +17,7 @@ from channels.layers import get_channel_layer
 from .models import Artwork, Photo, Bid, AppUser
 from .forms import ArtworkForm, CancelAuctionForm
 from .mixins import (
+    ArtworkBiddable,
     ArtworkFilterMixin,
     OwnedBySellerRequired,
     SellerRequired,
@@ -33,7 +34,9 @@ class HomePageView(ArtworkFilterMixin, ListView):
     model = Artwork
     template_name = "app/homepage.html"
     context_object_name = "latest_offers"
-    queryset = Artwork.objects.filter(status=Artwork.Status.AUCTIONING)
+    queryset = Artwork.objects.filter(
+        status=Artwork.Status.AUCTIONING, auction_end__gt=timezone.now()
+    ).order_by("auction_end")
 
 
 class SellerProfile(ArtworkFilterMixin, ListView):
@@ -128,7 +131,7 @@ class ArtworkCreateView(SellerRequired, CreateView):
         return super().form_valid(form)
 
 
-class ArtworkDetailView(DetailView):
+class ArtworkDetailView(ArtworkBiddable, DetailView):
     model = Artwork
 
     def get_recommendations(self):
