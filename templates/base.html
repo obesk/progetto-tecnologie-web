@@ -40,13 +40,17 @@
         <div>
           {% if user.is_authenticated %}
             <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle link-light" href="#" id="userMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                {{ user.username }}
-              </a>
+              <a class="nav-link dropdown-toggle link-light" href="#" id="userMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">{{ user.username }}</a>
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
-                {% comment %} <li><a class="dropdown-item" href="{% url 'profile' %}">Profile</a></li> {% endcomment %}
-                <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
-                <li><a class="dropdown-item" href="{% url 'app:customer_profile' %}"> Profile </a></li>
+                {% comment %} <li>
+                  <a class="dropdown-item" href="{% url 'profile' %}">Profile</a>
+                </li> {% endcomment %}
+                <li>
+                  <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="{% url 'app:customer_profile' %}">Profile</a>
+                </li>
               </ul>
             </li>
           {% else %}
@@ -58,6 +62,7 @@
       </ul>
 
       {% block content %}
+
       {% endblock %}
     </div>
   </body>

@@ -9,13 +9,14 @@ from .forms import CreateAppUser
 
 
 class HomeView(View):
-	template_name = 'home.html'
-	def get(self, request, *args, **kwargs):
-		return render(request, self.template_name)
+    template_name = "home.html"
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)
+
 
 class CustomerRegistrationView(SuccessMessageMixin, CreateView):
-	template_name = "register.html"
-	success_url = reverse_lazy('login')
-	form_class = CreateAppUser
-	success_message = "User created successfully"
-
+    template_name = "register.html"
+    success_url = reverse_lazy("login")
+    form_class = CreateAppUser
+    success_message = "User created successfully"

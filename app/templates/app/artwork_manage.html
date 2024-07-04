@@ -14,13 +14,13 @@
 
   {% include 'app/partials/artwork_carousel.html' with photos=photos %}
 
-  <h2> Edit Artwork</h2>
+  <h2>Edit Artwork</h2>
   <form method="post" enctype="multipart/form-data" class="mb-3">
     {% csrf_token %}
     {% bootstrap_form form %}
     <div class="mb-3">
       <label for="add_image" class="form-label">Add Images</label>
-      <input class="form-control" type="file" id="add_image" name="add_image" multiple>
+      <input class="form-control" type="file" id="add_image" name="add_image" multiple />
     </div>
     <button type="submit" class="btn btn-primary">Update</button>
   </form>
@@ -29,11 +29,11 @@
     {% for photo in photos %}
       <div class="col-md-4">
         <div class="card mb-4 shadow-sm">
-          <img src="{{ photo.file.url }}" class="card-img-top" alt="Image">
+          <img src="{{ photo.file.url }}" class="card-img-top" alt="Image" />
           <div class="card-body">
             <form method="post" action="{% url 'app:artwork_manage' object.pk %}">
               {% csrf_token %}
-              <input type="hidden" name="delete_image" value="{{ photo.id }}">
+              <input type="hidden" name="delete_image" value="{{ photo.id }}" />
               <button type="submit" class="btn btn-danger">Delete</button>
             </form>
           </div>
@@ -49,8 +49,7 @@
     <button type="submit" class="btn btn-danger" name="cancel_auction" value="1">Cancel Auction</button>
   </form>
 
-
-  <h2> Bids </h2>
+  <h2>Bids</h2>
   {% comment %}Auction history{% endcomment %}
   <h2>Auction History</h2>
   <table class="table table-striped">
