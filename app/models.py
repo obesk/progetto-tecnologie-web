@@ -30,7 +30,6 @@ class Category(models.Model):
 
 class AppUser(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    avatar = models.ImageField(upload_to="img/", blank=True, null=True)
     is_seller = models.BooleanField(default=False)
 
     class Meta:
@@ -38,9 +37,6 @@ class AppUser(models.Model):
 
     def __str__(self):
         return str(self.user)
-
-    notify_outbid = models.BooleanField(default=True)
-    notify_auction_end = models.BooleanField(default=True)
 
 
 class Artwork(models.Model):

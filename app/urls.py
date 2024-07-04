@@ -2,10 +2,14 @@ from django.urls import path
 from .views import *
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.auth import views as auth_views
 
 app_name = "app"
 
 urlpatterns = [
+    path("login/", auth_views.LoginView.as_view(), name="login"),
+    path("logout/", auth_views.LogoutView.as_view(), name="logout"),
+    path("register/", register, name="register"),
     path("seller/<int:seller_id>/", SellerProfile.as_view(), name="seller_profile"),
     path("customerprofile/", CustomerProfile.as_view(), name="customer_profile"),
     path("manageartworks/", SellerArtworkManagement.as_view(), name="manage_artworks"),

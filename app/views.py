@@ -1,3 +1,4 @@
+from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import redirect, get_object_or_404, render
 from django.contrib.auth.decorators import login_required
 from django.views.generic.list import ListView
@@ -13,9 +14,12 @@ from django.db.models import Q
 from asgiref.sync import async_to_sync
 from django.http import JsonResponse
 from channels.layers import get_channel_layer
+from django.contrib.auth.models import User
+from django.contrib.auth import login
+from .models import AppUser
 
 from .models import Artwork, Photo, Bid, AppUser
-from .forms import ArtworkForm, CancelAuctionForm
+from .forms import ArtworkForm, CancelAuctionForm, UserRegistrationForm, AppUserForm
 from .mixins import (
     ArtworkBiddable,
     ArtworkFilterMixin,
@@ -24,7 +28,6 @@ from .mixins import (
     OwnedBySellerRequired,
     CustomerRequired,
 )
-
 import logging
 
 logger = logging.getLogger(__name__)
@@ -276,3 +279,30 @@ def placeBid(request):
     else:
         messages.error(request, "Invalid request method.")
         return redirect("app:homepage")
+
+
+def register(request):
+    if request.method == "POST":
+        user_form = UserRegistrationForm(request.POST)
+        appuser_form = AppUserForm(request.POST, request.FILES)
+        if user_form.is_valid() and appuser_form.is_valid():
+            user = User.objects.create_user(
+                username=user_form.cleaned_data["username"],
+                password=user_form.cleaned_data["password"],
+            )
+            appuser = appuser_form.save(commit=False)
+            appuser.user = user
+            appuser.save()
+
+            # Authenticate and log in the user
+            login(request, user)
+            return redirect("app:homepage")
+    else:
+        user_form = UserRegistrationForm()
+        appuser_form = AppUserForm()
+
+    return render(
+        request,
+        "app/register.html",
+        {"user_form": user_form, "appuser_form": appuser_form},
+    )

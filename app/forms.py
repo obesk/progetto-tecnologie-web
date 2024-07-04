@@ -1,7 +1,12 @@
+from django.contrib.auth.forms import UserCreationForm, User
+from django.contrib.auth.models import Group
+from django.contrib.auth.models import User
+
+
 from django import forms
 from django.urls import reverse_lazy
 from django.utils import timezone
-from .models import Artist, Category, Artwork, Photo
+from .models import Artist, Category, Artwork, Photo, AppUser
 
 
 class MultipleFileInput(forms.ClearableFileInput):
@@ -98,3 +103,29 @@ class ArtworkFilterForm(forms.Form):
         required=False,
         widget=forms.Select(attrs={"class": "form-select"}),
     )
+
+
+class UserRegistrationForm(forms.ModelForm):
+    username = forms.CharField(max_length=150)
+    password = forms.CharField(widget=forms.PasswordInput)
+    confirm_password = forms.CharField(widget=forms.PasswordInput)
+
+    class Meta:
+        model = User
+        fields = ["username", "password", "confirm_password"]
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get("password")
+        confirm_password = cleaned_data.get("confirm_password")
+
+        if password != confirm_password:
+            raise forms.ValidationError("Password and confirm password does not match")
+
+        return cleaned_data
+
+
+class AppUserForm(forms.ModelForm):
+    class Meta:
+        model = AppUser
+        fields = ["is_seller"]
