@@ -3,6 +3,10 @@
 
 app/images/*
 
+
+## Celery 
+celerybeat-schedule.db
+
 ### Django ###
 *.log
 *.pot

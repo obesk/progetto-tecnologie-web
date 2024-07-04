@@ -20,6 +20,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "app",
+    "auctions",
     "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -27,7 +29,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "app",
     "bootstrap5",
     "crispy_forms",
     "crispy_bootstrap5",
@@ -135,3 +136,19 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGIN_REDIRECT_URL = "/?login=ok"
 LOGIN_URL = "/login/?auth=notok"
+
+
+# celery settings
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "UTC"
+
+CELERY_BEAT_SCHEDULE = {
+    "update-auction-status-every-hour": {
+        "task": "app.tasks.update_auction_status",
+        "schedule": 1.0,
+    },
+}
