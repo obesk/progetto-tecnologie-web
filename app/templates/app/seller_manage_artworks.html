@@ -7,8 +7,17 @@
 {% block content %}
   <h1>{{ title }}</h1>
 
-  <!-- Search Form -->
   {% include 'app/partials/artwork_filter_form.html' %}
+
+  <div class="container mt-3">
+    <div class="row">
+      <div class="col-12">
+        <a href="{% url 'app:create_artwork' %}" class="btn btn-primary btn-lg w-100">Create Artwork</a>
+      </div>
+    </div>
+  </div>
+
+  <br />
 
   <div class="row">
     {% for artwork in object_list %}
