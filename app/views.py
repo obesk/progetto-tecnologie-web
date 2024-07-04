@@ -2,6 +2,7 @@ from django.shortcuts import redirect, get_object_or_404, render
 from django.contrib.auth.decorators import login_required
 from django.views.generic.list import ListView
 from django.views.generic import DetailView, TemplateView
+from django.views.generic.edit import UpdateView
 from django.views.generic.edit import CreateView
 from django.urls import reverse_lazy
 from django.views.decorators.csrf import csrf_protect
@@ -147,9 +148,10 @@ class ArtworkDetailView(DetailView):
 		return context
 
 
-class SellerArtworkDetailView(OwnedBySellerRequired, DetailView):
+class SellerArtworkManage(OwnedBySellerRequired, UpdateView):
 	model = Artwork
 	template_name = "app/artwork_manage.html"
+	form_class = ArtworkForm
 
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
@@ -160,11 +162,28 @@ class SellerArtworkDetailView(OwnedBySellerRequired, DetailView):
 
 	def post(self, request, *args, **kwargs):
 		artwork = self.get_object()
+		
 		if request.POST.get("cancel_auction"):
 			artwork.cancel_auction()
 			messages.success(request, 'The auction has been cancelled.')
 			return redirect('app:artwork_manage', pk=artwork.pk)
+		if 'add_image' in request.FILES:
+			for f in request.FILES.getlist('add_image'):
+				Photo.objects.create(file=f, artwork=artwork)
+		if 'delete_image' in request.POST:
+			image_id = request.POST.get('delete_image')
+			try:
+				photo = Photo.objects.get(id=image_id)
+				photo.delete()
+				messages.success(request, 'Image deleted successfully.')
+			except Photo.DoesNotExist:
+				messages.error(request, 'Image does not exist.')
 		return self.get(request, *args, **kwargs)
+
+	def form_valid(self, form):
+		response = super().form_valid(form)
+		messages.success(self.request, 'The artwork has been updated successfully.')
+		return response
 
 
 @login_required
