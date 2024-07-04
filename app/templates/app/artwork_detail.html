@@ -9,17 +9,37 @@
   <h1>{{ object.name }}</h1>
   <h2>by {{ object.artist }}</h2>
 
-  {% comment %}Seller Information{% endcomment %}
   {% include 'app/partials/seller_card.html' with seller=seller %}
 
   {% include 'app/partials/artwork_carousel.html' with photos=photos %}
 
-  {% comment %}Countdown Timer{% endcomment %}
   <div class="mt-3">
     <div class="card text-center">
       <div class="card-header">Time Remaining</div>
       <div class="card-body">
         <h3 class="card-title countdown" data-auction-end="{{ object.auction_end|date:'Y-m-d H:i:s' }}" style="font-size: 32px; font-weight: bold;"></h3>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-3">
+    <div class="card text-center">
+      <div class="card-header">Current Price</div>
+      <div class="card-body">
+        <h3 class="card-title" style="font-size: 32px; font-weight: bold;">{{ artwork.price }}$</h3>
+        <form action="{% url 'app:placebid' %}" method="post" id="bid-form">
+          {% csrf_token %}
+          <input type="hidden" name="artwork_id" value="{{ artwork.id }}" />
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text" id="basic-addon3"><strong>${{ artwork.price }}</strong></span>
+            </div>
+            <input type="number" id="typeNumber" class="form-control" name="amount" min="{{ artwork.price|add:1 }}" />
+            <div class="input-group-append">
+              <button type="submit" class="btn btn-primary">Place Bid</button>
+            </div>
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -30,25 +50,14 @@
       <div class="alert {% if message.tags %}
           
           
+          
+          
           alert-{{ message.tags }}
         {% endif %}">{{ message }}</div>
     {% endfor %}
   {% endif %}
 
   {% comment %}menu for placing bids{% endcomment %}
-  <form action="{% url 'app:placebid' %}" method="post" id="bid-form">
-    {% csrf_token %}
-    <input type="hidden" name="artwork_id" value="{{ artwork.id }}" />
-    <div class="input-group">
-      <div class="input-group-prepend">
-        <span class="input-group-text" id="basic-addon3"><strong>${{ artwork.price }}</strong></span>
-      </div>
-      <input type="number" id="typeNumber" class="form-control" name="amount" min="{{ view.price|add:1 }}" />
-      <div class="input-group-append">
-        <button type="submit" class="btn btn-primary">Place Bid</button>
-      </div>
-    </div>
-  </form>
 
   <h2>Recommended Artworks</h2>
   <div class="row">
