@@ -256,24 +256,16 @@ def placeBid(request):
 
                 Bid.objects.create(artwork=artwork, customer=customer, amount=amount)
 
-                async_to_sync(channel_layer.group_send)(
-                    f"artwork_{artwork_id}",
-                    {
-                        "type": "send_message",
-                        "message": {
-                            "title": "New Bid Placed",
-                            "body": f"Your bid of {amount} on {artwork.name} has been placed successfully.",
-                        },
-                    },
-                )
-                return JsonResponse({"status": "success"})
+                messages.success(request, "Your bid has been placed successfully!")
+                return redirect("app:artworkdetail", pk=artwork_id)
             else:
-                return JsonResponse(
-                    {
-                        "status": "error",
-                        "message": "Bid amount must be higher than the current price.",
-                    }
+                messages.error(
+                    request, "Bid amount must be higher than the current price."
                 )
+                return redirect("app:artworkdetail", pk=artwork_id)
         except ValueError:
-            return JsonResponse({"status": "error", "message": "Invalid bid amount."})
-    return JsonResponse({"status": "error", "message": "Invalid request method."})
+            messages.error(request, "Invalid bid amount.")
+            return redirect("app:artworkdetail", pk=artwork_id)
+    else:
+        messages.error(request, "Invalid request method.")
+        return redirect("app:artworklist")
