@@ -7,8 +7,6 @@ name = "pypi"
 django = "*"
 pillow = "*"
 django-bootstrap-v5 = "*"
-django-crispy-forms = "*"
-crispy-bootstrap5 = "*"
 
 [dev-packages]
 

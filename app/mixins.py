@@ -80,12 +80,11 @@ class CustomerRequired:
 
 class ArtworkVisible:
     def dispatch(self, request, *args, **kwargs):
-        user = request.user
-        if not user.is_authenticated:
-            raise PermissionDenied("You need to login to view your profile")
-
         artwork = self.get_object()
-        app_user = request.user.appuser
+        if request.user.is_authenticated:
+            app_user = request.user.appuser
+        else:
+            app_user = None
         if (
             artwork.status != Artwork.Status.AUCTIONING
             or artwork.auction_end < timezone.now()
