@@ -40,6 +40,7 @@ class Command(BaseCommand):
                     },
                 )
             artwork.status = Artwork.Status.SOLD
+            artwork.sold_to = highest_bidder
             artwork.save()
             self.stdout.write(
                 self.style.SUCCESS(f'Artwork "{artwork.name}" marked as sold')

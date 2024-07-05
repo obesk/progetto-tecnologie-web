@@ -21,7 +21,7 @@ from .models import AppUser
 from .models import Artwork, Photo, Bid, AppUser
 from .forms import ArtworkForm, CancelAuctionForm, UserRegistrationForm, AppUserForm
 from .mixins import (
-    ArtworkBiddable,
+    ArtworkVisible,
     ArtworkFilterMixin,
     OwnedBySellerRequired,
     SellerRequired,
@@ -82,10 +82,13 @@ class CustomerProfile(TemplateView, CustomerRequired):
     template_name = "app/customer_profile.html"
 
     def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         customer = self.request.user.appuser
         bidded_artworks = []
         artworks = (
-            Artwork.objects.filter(Bids__customer=customer)
+            Artwork.objects.filter(
+                Bids__customer=customer, status=Artwork.Status.AUCTIONING
+            )
             .distinct()
             .order_by("auction_end")
         )
@@ -102,9 +105,16 @@ class CustomerProfile(TemplateView, CustomerRequired):
                     "is_winning": is_winning,
                 }
             )
-        context = super().get_context_data(**kwargs)
-        context["customer"] = customer
         context["bidded_artworks"] = bidded_artworks
+
+        artworks_bought = (
+            Artwork.objects.filter(sold_to=customer, status=Artwork.Status.SOLD)
+            .distinct()
+            .order_by("auction_end")
+        )
+        context["artworks_bought"] = artworks_bought
+
+        context["customer"] = customer
         context["title"] = f"{self.request.user.username}'s Auctioning Artworks"
         return context
 
@@ -136,7 +146,7 @@ class ArtworkCreateView(SellerRequired, CreateView):
         return reverse_lazy("app:artwork_manage", kwargs={"pk": self.object.pk})
 
 
-class ArtworkDetailView(ArtworkBiddable, DetailView):
+class ArtworkDetailView(ArtworkVisible, DetailView):
     model = Artwork
 
     def get_recommendations(self):

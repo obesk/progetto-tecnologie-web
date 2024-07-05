@@ -17,4 +17,15 @@
       </div>
     {% endfor %}
   </div>
+  <h2>Owned artworks</h2>
+  <div class="row">
+    {% for artwork in artworks_bought %}
+      <div class="col-md-3">
+        {% with artwork=artwork %}
+          {% include 'app/partials/artwork_card.html' %}
+          <p>{{ item }}</p>
+        {% endwith %}
+      </div>
+    {% endfor %}
+  </div>
 {% endblock %}

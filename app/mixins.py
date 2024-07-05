@@ -78,12 +78,17 @@ class CustomerRequired:
         return super().dispatch(request, *args, **kwargs)
 
 
-class ArtworkBiddable:
+class ArtworkVisible:
     def dispatch(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated:
+            raise PermissionDenied("You need to login to view your profile")
+
         artwork = self.get_object()
+        app_user = request.user.appuser
         if (
             artwork.status != Artwork.Status.AUCTIONING
             or artwork.auction_end < timezone.now()
-        ):
+        ) and app_user != artwork.sold_to:
             raise Http404("This artwork is not available for bidding.")
         return super().dispatch(request, *args, **kwargs)

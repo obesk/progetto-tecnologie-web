@@ -60,6 +60,10 @@ class Artwork(models.Model):
 
     description = models.TextField(max_length=255, default="")
 
+    sold_to = models.ForeignKey(
+        AppUser, on_delete=models.PROTECT, null=True, related_name="SoldArtworks"
+    )
+
     class Status(models.TextChoices):
         HIDDEN = "HI", _("Hidden")
         AUCTIONING = "AU", _("Auctioning")
