@@ -11,7 +11,7 @@ class Artist(models.Model):
     name = models.CharField(max_length=120)
     surname = models.CharField(max_length=120)
     biography = models.TextField()
-    birthday = models.DateField()
+    birthday = models.DateField(null=True)
 
     def __str__(self):
         return f"{self.name} {self.surname}"

@@ -26,5 +26,17 @@
 			"django": true,
 			"justMyCode": true
 		},
+		{
+			"name": "Python Debugger: Tests",
+			"type": "debugpy",
+			"request": "launch",
+			"program": "${workspaceFolder}/manage.py",
+			"args": [
+				"test",
+				"app.tests",
+			],
+			"django": true,
+			"justMyCode": true
+		},
 	]
 }

@@ -248,19 +248,14 @@ def placeBid(request):
         artwork = get_object_or_404(Artwork, id=artwork_id)
 
         if artwork.seller.user == user:
-            return JsonResponse(
-                {"status": "error", "message": "you can't place bids on your own items"}
-            )
+            messages.error(request, "You can't place bids on your own items")
+            return redirect("app:artworkdetail", pk=artwork_id)
 
         channel_layer = get_channel_layer()
 
         if channel_layer is None:
-            return JsonResponse(
-                {
-                    "status": "error",
-                    "message": "Channel layer is not configured correctly.",
-                }
-            )
+            messages.error(request, "Channel layer is not configured correctly")
+            return redirect("app:artworkdetail", pk=artwork_id)
 
         try:
             amount = float(request.POST.get("amount"))
@@ -283,15 +278,13 @@ def placeBid(request):
                 Bid.objects.create(artwork=artwork, customer=customer, amount=amount)
 
                 messages.success(request, "Your bid has been placed successfully!")
-                return redirect("app:artworkdetail", pk=artwork_id)
             else:
                 messages.error(
                     request, "Bid amount must be higher than the current price."
                 )
-                return redirect("app:artworkdetail", pk=artwork_id)
         except ValueError:
             messages.error(request, "Invalid bid amount.")
-            return redirect("app:artworkdetail", pk=artwork_id)
+        return redirect("app:artworkdetail", pk=artwork_id)
     else:
         messages.error(request, "Invalid request method.")
         return redirect("app:homepage")
