@@ -2,4 +2,5 @@
 
 {% block other_content %}
   <a href="{% url 'app:artwork_manage' artwork.pk %}" class="btn btn-warning">Manage Artwork</a>
+  <p>Status: {{ artwork.get_status_display }}</p>
 {% endblock %}

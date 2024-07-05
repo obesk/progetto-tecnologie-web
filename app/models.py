@@ -96,6 +96,7 @@ class Bid(models.Model):
     artwork = models.ForeignKey(Artwork, on_delete=models.CASCADE, related_name="Bids")
     customer = models.ForeignKey(AppUser, on_delete=models.CASCADE, related_name="Bids")
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    date_posted = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name_plural = "Bids"

@@ -71,6 +71,44 @@ class ArtworkForm(forms.ModelForm):
         return auction_end
 
 
+class ArtworkUpdateForm(forms.ModelForm):
+    template_name = "app/create_artwork.html"
+
+    class Meta:
+        model = Artwork
+        fields = [
+            "name",
+            "artist",
+            "category",
+            "description",
+            "publication_date",
+            "auction_end",
+        ]
+        widgets = {
+            "publication_date": forms.DateInput(attrs={"type": "date"}),
+            "auction_end": forms.DateTimeInput(attrs={"type": "datetime-local"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(ArtworkUpdateForm, self).__init__(*args, **kwargs)
+        self.fields["description"].required = False
+        self.fields["auction_end"].required = False
+
+    def clean_publication_date(self):
+        publication_date = self.cleaned_data.get("publication_date")
+        if publication_date > timezone.now().date():
+            raise forms.ValidationError("The publication date must be in the past.")
+        return publication_date
+
+    def clean_auction_end(self):
+        auction_end = self.cleaned_data.get("auction_end")
+        if auction_end and auction_end < timezone.now() + timezone.timedelta(hours=1):
+            raise forms.ValidationError(
+                "The auction end date must be at least an hour from now."
+            )
+        return auction_end
+
+
 class ArtworkFilterForm(forms.Form):
     q = forms.CharField(
         required=False,

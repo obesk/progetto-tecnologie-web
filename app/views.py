@@ -19,7 +19,13 @@ from django.contrib.auth import login
 from .models import AppUser
 
 from .models import Artwork, Photo, Bid, AppUser
-from .forms import ArtworkForm, CancelAuctionForm, UserRegistrationForm, AppUserForm
+from .forms import (
+    ArtworkForm,
+    CancelAuctionForm,
+    UserRegistrationForm,
+    AppUserForm,
+    ArtworkUpdateForm,
+)
 from .mixins import (
     ArtworkVisible,
     ArtworkFilterMixin,
@@ -197,7 +203,7 @@ class ArtworkDetailView(ArtworkVisible, DetailView):
 class SellerArtworkManage(OwnedBySellerRequired, UpdateView):
     model = Artwork
     template_name = "app/artwork_manage.html"
-    form_class = ArtworkForm
+    form_class = ArtworkUpdateForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
